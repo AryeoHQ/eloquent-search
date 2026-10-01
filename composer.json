@@ -1,0 +1,90 @@
+{
+    "name": "aryeo/temp",
+    "description": ":package_description",
+    "keywords": [
+        "Aryeo",
+        "laravel",
+        ":package_slug"
+    ],
+    "homepage": "https://github.com/aryeohq/:package_slug",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Aryeo",
+            "email": "support@aryeo.com",
+            "role": "Organization"
+        }
+    ],
+    "require": {
+        "php": "^8.3||^8.4",
+		"illuminate/console": "^11.0||^12.0",
+        "illuminate/contracts": "^11.0||^12.0",
+        "spatie/laravel-package-tools": "^1.16"
+    },
+    "require-dev": {
+        "aryeohq/phpstan-rules": "^1.1",
+        "brianium/paratest": "^7.8",
+        "canvural/larastan-strict-rules": "^3.0||^2.0",
+        "ergebnis/phpstan-rules": "^2.8",
+        "larastan/larastan": "^2.9||^3.0",
+        "laravel/pint": "^1.14",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.1.1",
+        "orchestra/testbench": "^10.0.0||^9.0.0",
+        "orchestra/testbench-core": "^10.0.0||^9.0.0",
+        "phpstan/phpstan": "^2.1||^1.12",
+        "phpstan/phpstan-deprecation-rules": "^1.1||^2.0",
+        "phpstan/phpstan-phpunit": "^1.3||^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "phpunit/php-code-coverage": "^12.0||^11.0",
+        "phpunit/phpunit": "^12||^11",
+        "shipmonk/composer-dependency-analyser": "^1.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Aryeo\\Skeleton\\": "src/",
+            "Aryeo\\Skeleton\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Aryeo\\Skeleton\\Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare",
+            "@composer run prepare"
+        ],
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve --host 0.0.0.0 --ansi"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Aryeo\\Skeleton\\SkeletonServiceProvider"
+            ],
+            "aliases": {
+                "Skeleton": "Aryeo\\Skeleton\\Facades\\Skeleton"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
