@@ -21,5 +21,4 @@ parameters:
     level: max
     paths:
         - src/
-        - database/
     strictRules:
