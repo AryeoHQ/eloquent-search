@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Support\Search\Scout;
 
-use Laravel\Scout\Builder;
 use Laravel\Scout\Searchable;
 use ReflectionClass;
 use Support\Search\Scout\Attributes\ScoutConnection;
@@ -15,19 +14,26 @@ trait InteractsWithSearchEngine
 {
     use Searchable;
 
+    protected static ?string $scoutBuilder = null;
+
     /**
-     * @var array<class-string, array{builder: ?string, queue: ?string, connection: ?string}>
+     * @var array<class-string, array{queue: ?string, connection: ?string}>
      */
     private static array $searchAttributeCache = [];
 
-    public function syncWithSearchUsing(): string
+    public static function bootInteractsWithSearchEngine(): void
     {
-        return $this->resolveSearchAttributes()['queue']
-            ?? config('scout.queue.queue')
-            ?? 'default';
+        $attributes = (new ReflectionClass(static::class))->getAttributes(UseScoutBuilder::class);
+
+        if ($attributes !== []) {
+            /** @var UseScoutBuilder $attr */
+            $attr = $attributes[0]->newInstance();
+            static::$scoutBuilder = $attr->builder;
+        }
     }
 
-    public function syncWithSearchUsingQueue(): string
+    // syncWithSearchUsing() → queue connection  (used in ->onConnection())
+    public function syncWithSearchUsing(): string
     {
         return $this->resolveSearchAttributes()['connection']
             ?? config('scout.queue.connection')
@@ -35,17 +41,16 @@ trait InteractsWithSearchEngine
             ?? 'sync';
     }
 
-    /**
-     * @return class-string<Builder>
-     */
-    public function makeSearchableUsing(): string
+    // syncWithSearchUsingQueue() → queue name  (used in ->onQueue())
+    public function syncWithSearchUsingQueue(): string
     {
-        return $this->resolveSearchAttributes()['builder']
-            ?? Builder::class;
+        return $this->resolveSearchAttributes()['queue']
+            ?? config('scout.queue.queue')
+            ?? 'default';
     }
 
     /**
-     * @return array{builder: ?string, queue: ?string, connection: ?string}
+     * @return array{queue: ?string, connection: ?string}
      */
     private function resolveSearchAttributes(): array
     {
@@ -56,14 +61,6 @@ trait InteractsWithSearchEngine
         }
 
         $reflection = new ReflectionClass($class);
-
-        $builder = null;
-        $builderAttributes = $reflection->getAttributes(UseScoutBuilder::class);
-        if ($builderAttributes !== []) {
-            /** @var UseScoutBuilder $attr */
-            $attr = $builderAttributes[0]->newInstance();
-            $builder = $attr->builder;
-        }
 
         $queue = null;
         $queueAttributes = $reflection->getAttributes(ScoutQueue::class);
@@ -81,6 +78,6 @@ trait InteractsWithSearchEngine
             $connection = $attr->connection;
         }
 
-        return self::$searchAttributeCache[$class] = compact('builder', 'queue', 'connection');
+        return self::$searchAttributeCache[$class] = compact('queue', 'connection');
     }
 }

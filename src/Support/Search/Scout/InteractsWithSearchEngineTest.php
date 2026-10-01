@@ -26,27 +26,63 @@ class InteractsWithSearchEngineTest extends TestCase
     }
 
     #[Test]
-    public function it_reads_scout_queue_from_attribute(): void
-    {
-        $model = new SearchableModel;
-
-        $this->assertSame('test-queue', $model->syncWithSearchUsing());
-    }
-
-    #[Test]
     public function it_reads_scout_connection_from_attribute(): void
     {
         $model = new SearchableModel;
 
-        $this->assertSame('test-connection', $model->syncWithSearchUsingQueue());
+        // syncWithSearchUsing() → connection (used in ->onConnection())
+        $this->assertSame('test-connection', $model->syncWithSearchUsing());
     }
 
     #[Test]
-    public function it_reads_scout_builder_from_attribute(): void
+    public function it_reads_scout_queue_from_attribute(): void
     {
         $model = new SearchableModel;
 
-        $this->assertSame(Builder::class, $model->makeSearchableUsing());
+        // syncWithSearchUsingQueue() → queue name (used in ->onQueue())
+        $this->assertSame('test-queue', $model->syncWithSearchUsingQueue());
+    }
+
+    #[Test]
+    public function it_sets_scout_builder_from_attribute_on_boot(): void
+    {
+        new SearchableModel;
+
+        $prop = (new ReflectionClass(SearchableModel::class))->getProperty('scoutBuilder');
+
+        $this->assertSame(Builder::class, $prop->getValue(new SearchableModel));
+    }
+
+    #[Test]
+    public function it_falls_back_to_scout_config_connection_when_no_attribute(): void
+    {
+        config()->set('scout.queue.connection', 'redis');
+
+        $model = new BareSearchableModel;
+
+        $this->assertSame('redis', $model->syncWithSearchUsing());
+    }
+
+    #[Test]
+    public function it_falls_back_to_queue_default_connection_when_no_scout_config(): void
+    {
+        config()->set('scout.queue.connection', null);
+        config()->set('queue.default', 'database');
+
+        $model = new BareSearchableModel;
+
+        $this->assertSame('database', $model->syncWithSearchUsing());
+    }
+
+    #[Test]
+    public function it_falls_back_to_sync_connection_when_no_config(): void
+    {
+        config()->set('scout.queue.connection', null);
+        config()->set('queue.default', null);
+
+        $model = new BareSearchableModel;
+
+        $this->assertSame('sync', $model->syncWithSearchUsing());
     }
 
     #[Test]
@@ -56,7 +92,7 @@ class InteractsWithSearchEngineTest extends TestCase
 
         $model = new BareSearchableModel;
 
-        $this->assertSame('fallback-queue', $model->syncWithSearchUsing());
+        $this->assertSame('fallback-queue', $model->syncWithSearchUsingQueue());
     }
 
     #[Test]
@@ -66,15 +102,7 @@ class InteractsWithSearchEngineTest extends TestCase
 
         $model = new BareSearchableModel;
 
-        $this->assertSame('default', $model->syncWithSearchUsing());
-    }
-
-    #[Test]
-    public function it_falls_back_to_scout_builder_when_no_attribute(): void
-    {
-        $model = new BareSearchableModel;
-
-        $this->assertSame(Builder::class, $model->makeSearchableUsing());
+        $this->assertSame('default', $model->syncWithSearchUsingQueue());
     }
 
     #[Test]
