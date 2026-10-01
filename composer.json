@@ -17,9 +17,19 @@
             "role": "Organization"
         }
     ],
+    "repositories": {
+        "primitives": {
+            "type": "vcs",
+            "url": "https://github.com/AryeoHQ/primitives"
+        },
+        "phpstan-rules": {
+            "type": "vcs",
+            "url": "https://github.com/AryeoHQ/phpstan-rules"
+        }
+    },
     "require": {
         "php": "^8.4",
-        "aryeo/primitives": "*",
+        "aryeo/primitives": "0.0.12",
         "directorytree/opensearch-adapter": "^1.1",
         "directorytree/opensearch-migrations": "^1.1",
         "directorytree/opensearch-scout-driver": "^1.1",
@@ -35,8 +45,8 @@
         "laravel/pint": "^1.14",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.0",
-        "orchestra/testbench": "^10.0",
-        "orchestra/testbench-core": "^10.0",
+        "orchestra/testbench": "^10.6",
+        "orchestra/testbench-core": "^10.7",
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "phpstan/phpstan-phpunit": "^2.0",
