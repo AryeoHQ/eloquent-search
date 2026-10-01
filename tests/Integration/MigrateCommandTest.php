@@ -7,20 +7,17 @@ namespace Tests\Integration;
 use DirectoryTree\OpenSearchClient\OpenSearchClientServiceProvider;
 use DirectoryTree\OpenSearchClient\OpenSearchManager;
 use DirectoryTree\OpenSearchMigrations\OpenSearchMigrationsServiceProvider;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use OpenSearch\Client;
-use Orchestra\Testbench\TestCase;
-use Support\Search\Scout\Providers\SearchServiceProvider;
+use Tests\TestCase;
 
 class MigrateCommandTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected string $indexPrefix;
 
     /**
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param  Application  $app
      * @return array<int, class-string>
      */
     protected function getPackageProviders($app): array
@@ -28,37 +25,33 @@ class MigrateCommandTest extends TestCase
         return [
             OpenSearchClientServiceProvider::class,
             OpenSearchMigrationsServiceProvider::class,
-            SearchServiceProvider::class,
+            ...parent::getPackageProviders($app),
         ];
-    }
-
-    protected function getEnvironmentSetUp($app): void
-    {
-        $app['config']->set('database.default', 'testing');
-
-        $app['config']->set('opensearch-client', [
-            'default' => 'default',
-            'connections' => [
-                'default' => [
-                    'base_uri' => env('OPENSEARCH_HOST', 'http://127.0.0.1:9200'),
-                ],
-            ],
-        ]);
-
-        $app['config']->set(
-            'opensearch-migrations.storage_directory',
-            realpath(__DIR__.'/../../opensearch/migrations'),
-        );
-
-        $app->bind(Client::class, fn ($app) => $app->make(OpenSearchManager::class)->default());
     }
 
     protected function setUp(): void
     {
         parent::setUp();
 
+        config()->set('opensearch-client', [
+            'default' => 'default',
+            'connections' => [
+                'default' => [
+                    'base_uri' => getenv('OPENSEARCH_HOST') ?: 'http://127.0.0.1:9200',
+                ],
+            ],
+        ]);
+
+        config()->set(
+            'opensearch-migrations.storage_directory',
+            realpath(__DIR__.'/../../opensearch/migrations'),
+        );
+
+        $this->app->bind(Client::class, fn ($app) => $app->make(OpenSearchManager::class)->default());
+
         $this->indexPrefix = sprintf('test_%s_', bin2hex(random_bytes(4)));
-        $this->app['config']->set('opensearch-migrations.index_name_prefix', $this->indexPrefix);
+
+        config()->set('opensearch-migrations.index_name_prefix', $this->indexPrefix);
     }
 
     protected function tearDown(): void

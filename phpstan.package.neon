@@ -29,8 +29,11 @@ parameters:
     level: max
     paths:
         - src/
+    stubFiles:
+        - stubs/Scout/Builder.stub.php
     excludePaths:
         - src/**/*Test.php
+        - src/Support/Search/Scout/Mixins/BuilderMixin.php
     ignoreErrors:
         - '#Trait .+ is used zero times and is not analysed\.#'
     strictRules:
