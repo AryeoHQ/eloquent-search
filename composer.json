@@ -1,12 +1,14 @@
 {
-    "name": "aryeo/temp",
-    "description": ":package_description",
+    "name": "aryeo/eloquent-search",
+    "description": "Laravel package providing OpenSearch Scout integration, index migration tooling, and PHPStan guardrails for Aryeo search models.",
     "keywords": [
         "Aryeo",
         "laravel",
-        ":package_slug"
+        "opensearch",
+        "scout"
     ],
-    "homepage": "https://github.com/aryeohq/:package_slug",
+    "homepage": "https://github.com/aryeohq/eloquent-search",
+    "type": "library",
     "license": "MIT",
     "authors": [
         {
@@ -16,58 +18,52 @@
         }
     ],
     "require": {
-        "php": "^8.3||^8.4",
-		"illuminate/console": "^11.0||^12.0",
-        "illuminate/contracts": "^11.0||^12.0",
-        "spatie/laravel-package-tools": "^1.16"
+        "php": "^8.4",
+        "aryeo/primitives": "*",
+        "directorytree/opensearch-adapter": "^1.1",
+        "directorytree/opensearch-migrations": "^1.1",
+        "directorytree/opensearch-scout-driver": "^1.1",
+        "illuminate/contracts": "^12.0",
+        "laravel/scout": "^10.0"
     },
     "require-dev": {
         "aryeohq/phpstan-rules": "^1.1",
         "brianium/paratest": "^7.8",
-        "canvural/larastan-strict-rules": "^3.0||^2.0",
+        "canvural/larastan-strict-rules": "^3.0",
         "ergebnis/phpstan-rules": "^2.8",
-        "larastan/larastan": "^2.9||^3.0",
+        "larastan/larastan": "^3.0",
         "laravel/pint": "^1.14",
         "mockery/mockery": "^1.6",
-        "nunomaduro/collision": "^8.1.1",
-        "orchestra/testbench": "^10.0.0||^9.0.0",
-        "orchestra/testbench-core": "^10.0.0||^9.0.0",
-        "phpstan/phpstan": "^2.1||^1.12",
-        "phpstan/phpstan-deprecation-rules": "^1.1||^2.0",
-        "phpstan/phpstan-phpunit": "^1.3||^2.0",
+        "nunomaduro/collision": "^8.0",
+        "orchestra/testbench": "^10.0",
+        "orchestra/testbench-core": "^10.0",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-phpunit": "^2.0",
         "phpstan/phpstan-strict-rules": "^2.0",
-        "phpunit/php-code-coverage": "^12.0||^11.0",
-        "phpunit/phpunit": "^12||^11",
+        "phpunit/phpunit": "^12.0",
         "shipmonk/composer-dependency-analyser": "^1.8"
     },
     "autoload": {
         "psr-4": {
-            "Aryeo\\Skeleton\\": "src/",
-            "Aryeo\\Skeleton\\Database\\Factories\\": "database/factories/"
-        }
+            "Support\\Search\\": "src/Support/Search/",
+            "Tooling\\EloquentSearch\\": "src/Tooling/EloquentSearch/"
+        },
+        "exclude-from-classmap": [
+            "*Test.php",
+            "*TestCases.php",
+            "/tests/"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
-            "Aryeo\\Skeleton\\Tests\\": "tests/",
-            "Workbench\\App\\": "workbench/app/",
-            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
-            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
+            "Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/"
         }
     },
     "scripts": {
-        "post-autoload-dump": [
-            "@clear",
-            "@prepare",
-            "@composer run prepare"
-        ],
-        "prepare": "@php vendor/bin/testbench package:discover --ansi",
-        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
-        "build": "@php vendor/bin/testbench workbench:build --ansi",
-        "serve": [
-            "Composer\\Config::disableProcessTimeout",
-            "@build",
-            "@php vendor/bin/testbench serve --host 0.0.0.0 --ansi"
-        ]
+        "test": "phpunit",
+        "analyse": "phpstan analyse --configuration=phpstan.package.neon"
     },
     "config": {
         "sort-packages": true,
@@ -78,11 +74,8 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Aryeo\\Skeleton\\SkeletonServiceProvider"
-            ],
-            "aliases": {
-                "Skeleton": "Aryeo\\Skeleton\\Facades\\Skeleton"
-            }
+                "Support\\Search\\Scout\\Providers\\SearchServiceProvider"
+            ]
         }
     },
     "minimum-stability": "dev",

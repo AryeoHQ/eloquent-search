@@ -1,61 +1,194 @@
-# :package_description
+# aryeo/eloquent-search
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/aryeo/:package_slug.svg?style=flat-square)](https://packagist.org/packages/:vendor_slug/:package_slug)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/aryeo/:package_slug/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/:vendor_slug/:package_slug/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/aryeo/:package_slug/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/:vendor_slug/:package_slug/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/aryeo/:package_slug.svg?style=flat-square)](https://packagist.org/packages/:vendor_slug/:package_slug)
-<!--delete-->
----
-This repo can be used to scaffold a Laravel package. Follow these steps to get started:
+Laravel package providing Eloquent builder filtering and sorting, OpenSearch Scout integration, and PHPStan guardrails for Aryeo search models.
 
-1. Press the "Use this template" button at the top of this repo to create a new repo with the contents of this skeleton.
-2. Run "php ./configure.php" to run a script that will replace all placeholders throughout all the files.
-3. Have fun creating your package.
-4. If you need help creating a package, consider picking up our <a href="https://laravelpackage.training">Laravel Package Training</a> video course.
----
-<!--/delete-->
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+Supersedes [`aryeo/eloquent-filters`](https://github.com/AryeoHQ/eloquent-filters). See [Migrating from eloquent-filters](#migrating-from-eloquent-filters).
 
 ## Installation
 
-You can install the package via composer:
-
 ```bash
-composer require aryeo/:package_slug
+composer require aryeo/eloquent-search
 ```
 
-You can publish and run the migrations with:
+The package auto-discovers its service provider via Laravel's package discovery.
 
-```bash
-php artisan vendor:publish --tag=":package_slug-migrations"
-php artisan migrate
-```
+---
 
-You can publish the config file with:
+## Database filtering and sorting
 
-```bash
-php artisan vendor:publish --tag=":package_slug-config"
-```
+The `Support\Search\Database` namespace provides reflection-driven filter and sort capabilities for Eloquent builder classes.
 
-This is the contents of the published config file:
+### Filters
+
+Implement `Filterable` and apply `HasFilters` to your builder:
 
 ```php
-return [
-];
+use Illuminate\Database\Eloquent\Builder;
+use Support\Search\Database\Attributes\Filter;
+use Support\Search\Database\Contracts\Filterable;
+use Support\Search\Database\HasFilters;
+
+class CompanyBuilder extends Builder implements Filterable
+{
+    use HasFilters;
+
+    #[Filter('status')]
+    public function ofStatus(string $status): static
+    {
+        return $this->where('status', $status);
+    }
+
+    #[Filter('market')]
+    public function inMarket(string $market): static
+    {
+        return $this->where('market', $market);
+    }
+}
 ```
 
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag=":package_slug-views"
-```
-
-## Usage
+Pass the entire request array to `filter()` — only keys that match a `#[Filter]` name are applied:
 
 ```php
-$variable = new Aryeo\Skeleton();
-echo $variable->echoPhrase('Hello, Aryeo!');
+Company::filter($request->all())->get();
 ```
+
+### Sorting
+
+Implement `Sortable` and apply `HasSort` to your builder:
+
+```php
+use Illuminate\Database\Eloquent\Builder;
+use Support\Search\Database\Contracts\Sortable;
+use Support\Search\Database\HasSort;
+
+class CompanyBuilder extends Builder implements Sortable
+{
+    use HasSort;
+}
+```
+
+`sort()` accepts a field name string, a `Sort` instance, or `null`. Prefix with `-` for descending order. A secondary sort on the primary key is added automatically for deterministic ordering when the sort field differs from it:
+
+```php
+Company::sort('name')->get();          // ascending
+Company::sort('-name')->get();         // descending
+Company::sort(null)->get();            // no sort applied
+Company::sort('name', 'desc')->get();  // explicit direction
+```
+
+---
+
+## Scout / OpenSearch integration
+
+The `Support\Search\Scout` namespace wires models to the OpenSearch Scout driver via PHP class attributes.
+
+### Setting up a searchable model
+
+Apply the `InteractsWithSearchEngine` trait and implement the `Searchable` contract:
+
+```php
+use Laravel\Scout\Searchable as ScoutSearchable;
+use Support\Search\Scout\Attributes\ScoutConnection;
+use Support\Search\Scout\Attributes\ScoutQueue;
+use Support\Search\Scout\Attributes\UseScoutBuilder;
+use Support\Search\Scout\Contracts\Searchable;
+use Support\Search\Scout\InteractsWithSearchEngine;
+
+#[ScoutQueue('search')]
+#[ScoutConnection('opensearch')]
+#[UseScoutBuilder(CompanySearchableBuilder::class)]
+class Company extends Model implements Searchable
+{
+    use InteractsWithSearchEngine;
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id'     => $this->id,
+            'name'   => $this->name,
+            'market' => $this->market,
+        ];
+    }
+
+    public function searchableAs(): string
+    {
+        return 'companies';
+    }
+}
+```
+
+### Attributes
+
+| Attribute | Target | Purpose |
+|---|---|---|
+| `#[ScoutQueue('queue-name')]` | Class | Queue used when syncing index jobs |
+| `#[ScoutConnection('connection')]` | Class | Queue connection for index jobs |
+| `#[UseScoutBuilder(BuilderClass::class)]` | Class | Custom Scout builder to use for searches |
+
+All three are optional. `InteractsWithSearchEngine` reads them via reflection and caches the result per class.
+
+---
+
+## PHPStan rules
+
+Twelve static analysis rules ship with the package under `Tooling\EloquentSearch\PhpStan\Rules`. Add the package ruleset to your `phpstan.neon`:
+
+```neon
+includes:
+    - vendor/aryeo/eloquent-search/phpstan.package.neon
+```
+
+### Database rules
+
+| Rule | Enforces |
+|---|---|
+| `FilterableMustUseHasFilters` | `Filterable` implementors must apply `HasFilters` |
+| `FilterableMustOnlyBeOnBuilder` | `Filterable` may only be implemented on `Illuminate\Database\Eloquent\Builder` subclasses |
+| `HasFiltersMustImplementFilterable` | Classes using `HasFilters` must implement `Filterable` |
+| `HasFiltersMustOnlyBeOnBuilder` | `HasFilters` may only be used on `Builder` subclasses |
+| `SortableMustUseHasSort` | `Sortable` implementors must apply `HasSort` |
+| `SortableMustOnlyBeOnBuilder` | `Sortable` may only be implemented on `Builder` subclasses |
+| `HasSortMustImplementSortable` | Classes using `HasSort` must implement `Sortable` |
+| `HasSortMustOnlyBeOnBuilder` | `HasSort` may only be used on `Builder` subclasses |
+
+### Scout rules
+
+| Rule | Enforces |
+|---|---|
+| `SearchableMustUseInteractsWithSearchEngine` | `Searchable` contract implementors must apply `InteractsWithSearchEngine` |
+| `SearchableMustNotUseScoutTraitDirectly` | Models must not use `Laravel\Scout\Searchable` directly; use `InteractsWithSearchEngine` instead |
+
+---
+
+## Migrating from eloquent-filters
+
+Replace namespace imports across your codebase:
+
+| Old (`eloquent-filters`) | New (`eloquent-search`) |
+|---|---|
+| `Support\Database\Eloquent\Contracts\Filterable` | `Support\Search\Database\Contracts\Filterable` |
+| `Support\Database\Eloquent\Contracts\Sortable` | `Support\Search\Database\Contracts\Sortable` |
+| `Support\Database\Eloquent\Contracts\Filter` | `Support\Search\Database\Contracts\Filter` |
+| `Support\Database\Eloquent\Attributes\Filter` | `Support\Search\Database\Attributes\Filter` |
+| `Support\Database\Eloquent\HasFilters` | `Support\Search\Database\HasFilters` |
+| `Support\Database\Eloquent\HasSort` | `Support\Search\Database\HasSort` |
+
+Update `composer.json`:
+
+```json
+{
+    "repositories": [
+        { "type": "vcs", "url": "https://github.com/AryeoHQ/eloquent-search" }
+    ],
+    "require": {
+        "aryeo/eloquent-search": "dev-main"
+    }
+}
+```
+
+Remove the `aryeo/eloquent-filters` repository entry and require line.
+
+---
 
 ## Testing
 
@@ -65,21 +198,8 @@ composer test
 
 ## Changelog
 
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](documentation/CONTRIBUTING.md) for details.
-
-## Security Vulnerabilities
-
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
-
-## Credits
-
-- [Aryeo](https://github.com/aryeohq)
-- [All Contributors](../../contributors)
+See [CHANGELOG](CHANGELOG.md).
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+The MIT License (MIT). See [LICENSE](LICENSE.md).
