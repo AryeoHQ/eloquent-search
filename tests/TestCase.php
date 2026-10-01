@@ -1,40 +1,47 @@
 <?php
 
-namespace Aryeo\Skeleton\Tests;
+declare(strict_types=1);
 
-use Aryeo\Skeleton\SkeletonServiceProvider;
-use Illuminate\Database\Eloquent\Factories\Factory;
+namespace Tests;
+
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithCachedConfig;
+use Illuminate\Foundation\Testing\WithCachedRoutes;
+use Illuminate\Support\Facades\Schema;
 use Orchestra\Testbench;
+use Support\Search\Scout\Providers\SearchServiceProvider;
 
 abstract class TestCase extends Testbench\TestCase
 {
-    /** @var \Illuminate\Testing\TestResponse|null */
-    public static $latestResponse = null;
+    use RefreshDatabase;
+    use WithCachedConfig;
+    use WithCachedRoutes;
 
-    protected function setUp(): void
+    protected function defineDatabaseMigrations(): void
     {
-        parent::setUp();
-
-        Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Aryeo\\Skeleton\\Database\\Factories\\'.class_basename($modelName).'Factory'
-        );
+        Schema::create('users', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('role');
+            $table->string('status');
+            $table->timestamps();
+        });
     }
 
-    protected function getPackageProviders($app)
+    /**
+     * @param  Application  $app
+     * @return array<int, class-string>
+     */
+    protected function getPackageProviders($app): array
     {
         return [
-            SkeletonServiceProvider::class,
+            SearchServiceProvider::class,
         ];
     }
 
-    public function getEnvironmentSetUp($app)
+    public function getEnvironmentSetUp($app): void
     {
         config()->set('database.default', 'testing');
-
-        /*
-         foreach (\Illuminate\Support\Facades\File::allFiles(__DIR__ . '/database/migrations') as $migration) {
-            (include $migration->getRealPath())->up();
-         }
-         */
     }
 }
