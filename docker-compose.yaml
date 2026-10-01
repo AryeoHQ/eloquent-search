@@ -1,24 +1,12 @@
-networks:
-  app:
-    driver: bridge
-
 services:
   php:
-    build:
-      context: .
-      dockerfile: ./docker/php/Dockerfile
-      target: local
-    environment:
-      COMPOSER_CACHE_DIR: "/tmp/.cache"
-      COMPOSER_HOME:
-    networks:
-      - app
-    ports:
-      - "8000:8000"
-    tty: true
+    image: composer:2
+    working_dir: /app
     volumes:
-      - .:/usr/src/app
-      - composer:/tmp/.cache
+      - .:/app
+      - composer-cache:/tmp/composer
+    environment:
+      COMPOSER_HOME: /tmp/composer
 
 volumes:
-  composer:
+  composer-cache:
