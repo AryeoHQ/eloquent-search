@@ -1,0 +1,41 @@
+services:
+    -
+        class: Tooling\EloquentSearch\PhpStan\Rules\FilterableMustUseHasFilters
+        tags:
+            - phpstan.rules.rule
+    -
+        class: Tooling\EloquentSearch\PhpStan\Rules\HasFiltersMustImplementFilterable
+        tags:
+            - phpstan.rules.rule
+    -
+        class: Tooling\EloquentSearch\PhpStan\Rules\SortableMustUseHasSort
+        tags:
+            - phpstan.rules.rule
+    -
+        class: Tooling\EloquentSearch\PhpStan\Rules\HasSortMustImplementSortable
+        tags:
+            - phpstan.rules.rule
+    -
+        class: Tooling\EloquentSearch\PhpStan\Rules\FilterableMustOnlyBeOnBuilder
+        tags:
+            - phpstan.rules.rule
+    -
+        class: Tooling\EloquentSearch\PhpStan\Rules\HasFiltersMustOnlyBeOnBuilder
+        tags:
+            - phpstan.rules.rule
+    -
+        class: Tooling\EloquentSearch\PhpStan\Rules\SortableMustOnlyBeOnBuilder
+        tags:
+            - phpstan.rules.rule
+    -
+        class: Tooling\EloquentSearch\PhpStan\Rules\HasSortMustOnlyBeOnBuilder
+        tags:
+            - phpstan.rules.rule
+    -
+        class: Tooling\EloquentSearch\PhpStan\Rules\SearchableMustUseInteractsWithSearchEngine
+        tags:
+            - phpstan.rules.rule
+    -
+        class: Tooling\EloquentSearch\PhpStan\Rules\SearchableMustNotUseScoutTraitDirectly
+        tags:
+            - phpstan.rules.rule

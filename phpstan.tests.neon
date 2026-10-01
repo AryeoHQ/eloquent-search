@@ -9,7 +9,7 @@ includes:
 parameters:
     aryeo:
         tests:
-            testCaseClass: Aryeo\Skeleton\Tests\TestCase
+            testCaseClass: Tests\TestCase
     ergebnis:
         allRules: false
         testCaseWithSuffix:
