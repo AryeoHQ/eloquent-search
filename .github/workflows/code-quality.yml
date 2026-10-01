@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout ref
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: ./.github/actions/setup-php
@@ -29,7 +29,7 @@ jobs:
 
     steps:
       - name: Checkout ref
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: ./.github/actions/setup-php
@@ -54,7 +54,7 @@ jobs:
 
     steps:
       - name: Checkout ref
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: ./.github/actions/setup-php
@@ -84,7 +84,7 @@ jobs:
 
     steps:
       - name: Checkout ref
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: ./.github/actions/setup-php
@@ -121,7 +121,7 @@ jobs:
           thresholds: '80 90'
 
       - name: Add Coverage PR Comment
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         if: github.event_name == 'pull_request'
         with:
           recreate: true

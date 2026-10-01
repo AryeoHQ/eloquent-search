@@ -30,7 +30,7 @@ final class HasFiltersMustImplementFilterable extends Rule
     {
         $this->error(
             message: 'HasFilters must implement Filterable.',
-            line: $node->name->getStartLine(),
+            line: $node->name?->getStartLine() ?? $node->getStartLine(),
             identifier: 'filtering.hasFilters.mustImplement.filterable'
         );
     }

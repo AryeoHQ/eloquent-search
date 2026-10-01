@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Support\Search\Scout;
 
+use Laravel\Scout\Builder;
 use Laravel\Scout\Searchable;
 use ReflectionClass;
 use Support\Search\Scout\Attributes\ScoutConnection;
@@ -22,22 +23,25 @@ trait InteractsWithSearchEngine
     public function syncWithSearchUsing(): string
     {
         return $this->resolveSearchAttributes()['queue']
-            ?? config('scout.queue.queue', 'default');
+            ?? config('scout.queue.queue')
+            ?? 'default';
     }
 
     public function syncWithSearchUsingQueue(): string
     {
         return $this->resolveSearchAttributes()['connection']
-            ?? config('scout.queue.connection', config('queue.default'));
+            ?? config('scout.queue.connection')
+            ?? config('queue.default')
+            ?? 'sync';
     }
 
     /**
-     * @return class-string<\Laravel\Scout\Builder>
+     * @return class-string<Builder>
      */
     public function makeSearchableUsing(): string
     {
         return $this->resolveSearchAttributes()['builder']
-            ?? \Laravel\Scout\Builder::class;
+            ?? Builder::class;
     }
 
     /**

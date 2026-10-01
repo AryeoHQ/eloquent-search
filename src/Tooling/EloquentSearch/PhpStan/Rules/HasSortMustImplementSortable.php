@@ -30,7 +30,7 @@ final class HasSortMustImplementSortable extends Rule
     {
         $this->error(
             message: 'HasSort must implement Sortable.',
-            line: $node->name->getStartLine(),
+            line: $node->name?->getStartLine() ?? $node->getStartLine(),
             identifier: 'sorting.hasSort.mustImplement.sortable'
         );
     }

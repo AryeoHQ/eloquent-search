@@ -28,7 +28,7 @@ final class HasSortMustOnlyBeOnBuilder extends Rule
     {
         $this->error(
             message: 'HasSort must only be on Builder.',
-            line: $node->name->getStartLine(),
+            line: $node->name?->getStartLine() ?? $node->getStartLine(),
             identifier: 'sorting.hasSort.mustOnlyBeOn.builder'
         );
     }

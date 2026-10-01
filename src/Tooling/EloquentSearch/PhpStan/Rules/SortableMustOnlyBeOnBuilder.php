@@ -28,7 +28,7 @@ final class SortableMustOnlyBeOnBuilder extends Rule
     {
         $this->error(
             message: 'Sortable must only be on Builder.',
-            line: $node->name->getStartLine(),
+            line: $node->name?->getStartLine() ?? $node->getStartLine(),
             identifier: 'sorting.sortable.mustOnlyBeOn.builder'
         );
     }

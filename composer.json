@@ -25,16 +25,23 @@
         "phpstan-rules": {
             "type": "vcs",
             "url": "https://github.com/AryeoHQ/phpstan-rules"
+        },
+        "tooling-laravel": {
+            "type": "vcs",
+            "url": "https://github.com/AryeoHQ/tooling-laravel"
         }
     },
     "require": {
         "php": "^8.4",
         "aryeo/primitives": "0.0.12",
+        "aryeo/tooling-laravel": "0.0.39",
         "directorytree/opensearch-adapter": "^1.1",
         "directorytree/opensearch-migrations": "^1.1",
         "directorytree/opensearch-scout-driver": "^1.1",
-        "illuminate/contracts": "^12.0",
-        "laravel/scout": "^10.0"
+        "laravel/framework": "^12.36",
+        "laravel/scout": "^10.0",
+        "nikic/php-parser": "^5.7",
+        "phpstan/phpstan": "^2.1"
     },
     "require-dev": {
         "aryeohq/phpstan-rules": "^1.1",
@@ -47,7 +54,6 @@
         "nunomaduro/collision": "^8.0",
         "orchestra/testbench": "^10.6",
         "orchestra/testbench-core": "^10.7",
-        "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "phpstan/phpstan-phpunit": "^2.0",
         "phpstan/phpstan-strict-rules": "^2.0",
@@ -67,8 +73,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/",
-            "Workbench\\App\\": "workbench/app/"
+            "Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -78,7 +83,9 @@
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            "pestphp/pest-plugin": true
+            "aryeo/tooling-laravel": true,
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
         }
     },
     "extra": {

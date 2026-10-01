@@ -30,7 +30,7 @@ final class SortableMustUseHasSort extends Rule
     {
         $this->error(
             message: 'Sortable must use HasSort.',
-            line: $node->name->getStartLine(),
+            line: $node->name?->getStartLine() ?? $node->getStartLine(),
             identifier: 'sorting.sortable.mustUse.hasSort'
         );
     }

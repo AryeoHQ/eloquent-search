@@ -19,10 +19,10 @@ class InteractsWithSearchEngineTest extends TestCase
     {
         parent::setUp();
 
-        $cache = (new ReflectionClass(InteractsWithSearchEngine::class))
-            ->getProperty('searchAttributeCache');
-        $cache->setAccessible(true);
-        $cache->setValue(null, []);
+        foreach ([SearchableModel::class, BareSearchableModel::class] as $class) {
+            $prop = (new ReflectionClass($class))->getProperty('searchAttributeCache');
+            $prop->setValue(null, []);
+        }
     }
 
     #[Test]
@@ -83,9 +83,8 @@ class InteractsWithSearchEngineTest extends TestCase
         $model = new SearchableModel;
         $model->syncWithSearchUsing();
 
-        $cache = (new ReflectionClass(InteractsWithSearchEngine::class))
+        $cache = (new ReflectionClass(SearchableModel::class))
             ->getProperty('searchAttributeCache');
-        $cache->setAccessible(true);
 
         $this->assertArrayHasKey(SearchableModel::class, $cache->getValue(null));
     }

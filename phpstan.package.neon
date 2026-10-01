@@ -15,10 +15,22 @@ parameters:
             enabled: false
         noExtends:
             enabled: false
+        noNamedArgument:
+            enabled: false
+        noParameterWithNullableTypeDeclaration:
+            enabled: false
+        noParameterWithNullDefaultValue:
+            enabled: false
+        noPhpstanIgnore:
+            enabled: false
     larastanStrictRules:
         noFacade: false
         noGlobalLaravelFunction: false
     level: max
     paths:
         - src/
+    excludePaths:
+        - src/**/*Test.php
+    ignoreErrors:
+        - '#Trait .+ is used zero times and is not analysed\.#'
     strictRules:

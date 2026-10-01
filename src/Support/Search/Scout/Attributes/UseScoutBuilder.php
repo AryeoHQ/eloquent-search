@@ -11,7 +11,7 @@ use Laravel\Scout\Builder;
 final readonly class UseScoutBuilder
 {
     /**
-     * @param  class-string<Builder>  $builder
+     * @param  class-string<Builder<covariant \Illuminate\Database\Eloquent\Model>>  $builder
      */
     public function __construct(
         public string $builder,

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Support\Search\Database;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Support\Primitives\Direction;
 use Support\Primitives\Sort;
 use Support\Primitives\Text;
 
 /**
- * @mixin \Illuminate\Database\Eloquent\Builder<\Illuminate\Database\Eloquent\Model>
+ * @mixin Builder<Model>
  */
 trait HasSort
 {

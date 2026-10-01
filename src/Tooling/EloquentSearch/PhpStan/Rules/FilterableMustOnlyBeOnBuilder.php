@@ -28,7 +28,7 @@ final class FilterableMustOnlyBeOnBuilder extends Rule
     {
         $this->error(
             message: 'Filterable must only be on Builder.',
-            line: $node->name->getStartLine(),
+            line: $node->name?->getStartLine() ?? $node->getStartLine(),
             identifier: 'filtering.filterable.mustOnlyBeOn.builder'
         );
     }

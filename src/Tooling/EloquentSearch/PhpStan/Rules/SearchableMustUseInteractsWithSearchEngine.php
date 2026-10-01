@@ -28,7 +28,7 @@ final class SearchableMustUseInteractsWithSearchEngine extends Rule
     {
         $this->error(
             message: 'Searchable must use InteractsWithSearchEngine.',
-            line: $node->name->getStartLine(),
+            line: $node->name?->getStartLine() ?? $node->getStartLine(),
             identifier: 'search.scout.searchable.mustUse.interactsWithSearchEngine'
         );
     }

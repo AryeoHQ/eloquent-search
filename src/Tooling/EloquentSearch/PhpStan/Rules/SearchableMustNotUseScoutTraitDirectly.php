@@ -28,7 +28,7 @@ final class SearchableMustNotUseScoutTraitDirectly extends Rule
     {
         $this->error(
             message: 'Use InteractsWithSearchEngine instead of Laravel\Scout\Searchable directly.',
-            line: $node->name->getStartLine(),
+            line: $node->name?->getStartLine() ?? $node->getStartLine(),
             identifier: 'search.scout.mustUse.interactsWithSearchEngine'
         );
     }

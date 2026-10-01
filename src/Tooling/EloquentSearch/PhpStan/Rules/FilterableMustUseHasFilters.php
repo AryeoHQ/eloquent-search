@@ -30,7 +30,7 @@ final class FilterableMustUseHasFilters extends Rule
     {
         $this->error(
             message: 'Filterable must use HasFilters.',
-            line: $node->name->getStartLine(),
+            line: $node->name?->getStartLine() ?? $node->getStartLine(),
             identifier: 'filtering.filterable.mustUse.hasFilters'
         );
     }
