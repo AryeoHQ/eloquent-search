@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+# snap — shorthand for docker compose
+
+# ------------------------------------------------------------
+# show_usage: print usage text and exit
+# ------------------------------------------------------------
+show_usage() {
+  cat <<USAGE
+Usage: snap [ -h | --help | help ] <command> [args…]
+
+Commands:
+  composer     Run Composer
+  phpstan      Run PHPStan (use --test or --tests to analyse the tests directory)
+  pint         Run Laravel Pint
+  test         Run Paratest
+  workbench    Serve the workbench test application
+  shell        Open shell in $SERVICE container
+  exec         Run arbitrary cmd in any service
+  stats        One-shot frankenphp stats
+  build        (auto SSO-login if needed) + build frankenphp
+  update       Pull & recreate frankenphp
+  reload       Restart frankenphp service
+  cleanup      Prune unused Docker artifacts
+  up           docker compose up -d (all services)
+  down         docker compose down
+
+Options:
+  -h, --help, help    Show this help message and exit
+USAGE
+  exit 0
+}
+
+# ------------------------------------------------------------
+# Configuration
+# ------------------------------------------------------------
+SERVICE="php"
+DC_BASE="docker compose"
+DC_ARGS="--rm --remove-orphans"
+DC_RUN="$DC_BASE run $DC_ARGS $SERVICE"
+
+# ------------------------------------------------------------
+# Pre-flight: help flag?
+# ------------------------------------------------------------
+case "$1" in
+  -h|--help|help)
+    show_usage
+    ;;
+esac
+
+# ------------------------------------------------------------
+# Must have at least one command
+# ------------------------------------------------------------
+if [ $# -lt 1 ]; then
+  echo "Error: No command specified." >&2
+  show_usage
+  exit 1
+fi
+
+CMD="$1"; shift
+
+# ------------------------------------------------------------
+# Dispatch
+# ------------------------------------------------------------
+case "$CMD" in
+  composer)
+    exec $DC_RUN /usr/local/bin/composer "$@" ;;
+  phpstan)
+    # default to package config
+    CONFIG="phpstan.package.neon"
+    new_args=()
+    for arg in "$@"; do
+      case "$arg" in
+        --tests|--test) CONFIG="phpstan.tests.neon" ;;
+        *)             new_args+=("$arg")      ;;
+      esac
+    done
+    set -- "${new_args[@]}"
+    exec $DC_RUN ./vendor/bin/phpstan analyse --memory-limit=2G -c "$CONFIG" "$@" ;;
+  pint)
+    exec $DC_RUN php ./vendor/bin/pint "$@" ;;
+  test)
+    exec $DC_RUN php ./vendor/bin/paratest "$@" ;;
+  workbench)
+    exec $DC_BASE run $DC_ARGS -p 8000:8000 $SERVICE /usr/local/bin/composer run serve "$@" ;;
+  shell)
+    exec $DC_RUN sh ;;
+  exec)
+    if [ $# -lt 2 ]; then
+      echo "Usage: snap exec <service> <cmd> [args…]" >&2
+      exit 1
+    fi
+    TARGET="$1"; shift
+    exec $DC_BASE run --rm "$TARGET" "$@" ;;
+  stats)
+    exec $DC_BASE stats --no-stream $SERVICE ;;
+  build)
+    $DC_BASE build $SERVICE ;;
+  update)
+    docker compose pull && exec $DC_BASE up -d --force-recreate $SERVICE ;;
+  reload)
+    exec $DC_BASE restart $SERVICE ;;
+  cleanup)
+    exec docker system prune -f ;;
+  up)
+    exec $DC_BASE up -d "$@" ;;
+  down)
+    exec $DC_BASE down "$@" ;;
+  *)
+    echo "Error: Unknown command '$CMD'." >&2
+    show_usage
+    exit 2
+    ;;
+esac
+
+# ------------------------------------------------------------
+# Bash/Zsh autocompletion (unchanged)
+# ------------------------------------------------------------
+_snap_completion() {
+  local cur cmds services
+  COMPREPLY=()
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  cmds="artisan composer phpstan pint test workbench shell exec stats build update reload cleanup up down"
+  if [ $COMP_CWORD -eq 1 ]; then
+    COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
+  elif [ "${COMP_WORDS[1]}" = "exec" ]; then
+    services=$($DC_BASE config --services 2>/dev/null)
+    COMPREPLY=( $(compgen -W "$services" -- "$cur") )
+  fi
+}
+complete -F _snap_completion snap
+if [ -n "$ZSH_VERSION" ]; then
+  autoload -U +X compinit && compinit
+  compdef _snap_completion snap
+fi
