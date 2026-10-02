@@ -56,7 +56,5 @@ runs:
 
     - name: Install Composer dependencies
       if: ${{ inputs.install_dependencies == 'true' }}
-      uses: php-actions/composer@v6
-      with:
-        php_version: ${{ inputs.php_version }}
-        version: ${{ inputs.composer_version }}
+      shell: bash
+      run: composer install --prefer-dist --no-interaction --no-progress
