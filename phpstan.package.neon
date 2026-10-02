@@ -31,9 +31,11 @@ parameters:
         - src/
     stubFiles:
         - stubs/Scout/Builder.stub.php
+        - stubs/OpenSearch/IndicesNamespace.stub.php
     excludePaths:
         - src/**/*Test.php
         - src/Support/Search/Scout/Mixins/BuilderMixin.php
+        - src/Support/Search/Scout/Console/ScoutDispatch.php
     ignoreErrors:
         - '#Trait .+ is used zero times and is not analysed\.#'
     strictRules:
