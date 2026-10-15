@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Support\Search\Database\Provides;
 
-use Illuminate\Http\Request;
 use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\Fixtures\Support\Database\Users\Role;
@@ -26,12 +25,9 @@ class HasFiltersTest extends TestCase
             ->invited()
             ->create();
 
-        $request = new Request([
+        $users = User::filter([
             'role' => Role::Admin,
-        ]);
-
-        $users = User::filter($request->all())
-            ->get();
+        ])->get();
 
         $this->assertCount(1, $users);
         $this->assertEquals($user1->id, $users->first()->id);
@@ -52,14 +48,11 @@ class HasFiltersTest extends TestCase
                 'created_at' => now()->subDays(2),
             ]);
 
-        $request = new Request([
+        $users = User::filter([
             'role' => Role::Admin,
             'status' => 'active',
             'is_new' => true,
-        ]);
-
-        $users = User::filter($request->all())
-            ->get();
+        ])->get();
 
         $this->assertCount(1, $users);
         $this->assertEquals($user1->id, $users->first()->id);

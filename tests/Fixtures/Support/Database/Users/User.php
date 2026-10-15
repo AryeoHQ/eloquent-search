@@ -19,8 +19,6 @@ class User extends Model
 
     use HasUuids;
 
-    protected $table = 'users';
-
     protected $fillable = [
         'role',
         'status',

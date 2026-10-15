@@ -10,7 +10,7 @@ use PHPStan\Testing\RuleTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use Support\Search\Scout\Attributes\UseScoutBuilder;
-use Tests\Fixtures\Tooling\Scout\Concerns\GetsFixtures;
+use Tests\Fixtures\Tooling\Concerns\GetsFixtures;
 
 /** @extends RuleTestCase<UseScoutBuilderMustReferenceScoutBuilder> */
 #[CoversClass(UseScoutBuilderMustReferenceScoutBuilder::class)]
@@ -26,13 +26,13 @@ class UseScoutBuilderMustReferenceScoutBuilderTest extends RuleTestCase
     #[Test]
     public function it_passes_when_use_scout_builder_references_a_scout_builder(): void
     {
-        $this->analyse([$this->getFixturePath('ValidSearchableModel.php')], []);
+        $this->analyse([$this->getFixturePath('Scout/ValidSearchableModel.php')], []);
     }
 
     #[Test]
     public function it_fails_when_use_scout_builder_references_something_else(): void
     {
-        $this->analyse([$this->getFixturePath('UseScoutBuilderWithNonBuilder.php')], [
+        $this->analyse([$this->getFixturePath('Scout/UseScoutBuilderWithNonBuilder.php')], [
             [
                 class_basename(UseScoutBuilder::class).' must reference '.Builder::class.'.',
                 13,

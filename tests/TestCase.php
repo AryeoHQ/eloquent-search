@@ -28,11 +28,36 @@ abstract class TestCase extends Testbench\TestCase
             $table->timestamps();
         });
 
-        Schema::create('companies', function (Blueprint $table) {
+        Schema::create('agencies', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->boolean('active');
             $table->timestamps();
             $table->softDeletes();
+        });
+
+        Schema::create('teams', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('agency_id')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('agents', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('team_id')->nullable();
+            $table->foreignId('primary_agency_id')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('agency_agent', function (Blueprint $table) {
+            $table->foreignId('agency_id');
+            $table->foreignId('agent_id');
+        });
+
+        Schema::create('activities', function (Blueprint $table) {
+            $table->id();
+            $table->morphs('subject');
+            $table->timestamps();
         });
     }
 
