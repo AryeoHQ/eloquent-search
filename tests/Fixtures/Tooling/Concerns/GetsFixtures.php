@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Fixtures\Tooling\Scout\Concerns;
+namespace Tests\Fixtures\Tooling\Concerns;
 
 trait GetsFixtures
 {

@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Support\Search\Scout\Provides;
 
+use Illuminate\Support\Collection;
+use ReflectionAttribute;
 use ReflectionClass;
+use ReflectionMethod;
+use Support\Search\Scout\Attributes\Reindex;
 use Support\Search\Scout\Attributes\ScoutConnection;
 use Support\Search\Scout\Attributes\ScoutQueue;
 use Support\Search\Scout\Attributes\UseScoutBuilder;
@@ -62,5 +66,12 @@ trait InteractsWithSearchEngine
         return static::$resolvedScoutAttributes[static::class][$attribute] = $attributes === []
             ? null
             : $attributes[0]->newInstance()->{$property};
+    }
+
+    /** @return Collection<int, Reindex> */
+    public static function reindexes(): Collection
+    {
+        return collect((new ReflectionMethod(static::class, 'toSearchableArray'))->getAttributes(Reindex::class))
+            ->map(fn (ReflectionAttribute $attribute): Reindex => $attribute->newInstance());
     }
 }

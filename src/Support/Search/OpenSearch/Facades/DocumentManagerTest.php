@@ -38,8 +38,10 @@ class DocumentManagerTest extends TestCase
         $documents->assertIndexed(
             $agency->searchableAs(),
             [
-                new Document((string) $agency->getScoutKey(),
-                    $agency->toSearchableArray()),
+                new Document(
+                    (string) $agency->getScoutKey(),
+                    $agency->toSearchableArray(),
+                ),
             ]
         );
     }

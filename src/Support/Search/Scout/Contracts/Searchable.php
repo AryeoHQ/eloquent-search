@@ -39,4 +39,7 @@ interface Searchable
 
     /** @return string|null */
     public function syncWithSearchUsingQueue();
+
+    /** @return \Illuminate\Support\Collection<int, \Support\Search\Scout\Attributes\Reindex> */
+    public static function reindexes();
 }

@@ -6,9 +6,5 @@ namespace Tests\Fixtures\Tooling\Scout;
 
 use Laravel\Scout\Builder;
 
-/**
- * @template TModel of \Illuminate\Database\Eloquent\Model
- *
- * @extends Builder<TModel>
- */
+/** @extends Builder<\Tests\Fixtures\Tooling\Scout\ValidSearchableModel> */
 class ValidScoutBuilder extends Builder {}

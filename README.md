@@ -160,14 +160,14 @@ Search is built on [Laravel Scout](https://laravel.com/docs/scout) with an OpenS
 
 #### Setting up your model
 
-Implement the `Support\Search\Scout\Contracts\Searchable` contract and use the `Support\Search\Scout\Provides\InteractsWithSearchEngine` trait. Use this trait instead of Scout's own `Searchable` trait. It wraps Scout's trait and also reads the attributes below. PHPStan will flag a model that uses Scout's trait directly.
+Implement the `Support\Search\Scout\Contracts\Searchable` contract and use the `Support\Search\Scout\Provides\InteractsWithSearchEngine` trait. Use this trait instead of Scout's own `Searchable` trait. It wraps Scout's trait and also reads the attributes below.
 
 ```php
 use Illuminate\Database\Eloquent\Model;
 use Support\Search\Scout\Contracts\Searchable;
 use Support\Search\Scout\Provides\InteractsWithSearchEngine;
 
-class Company extends Model implements Searchable
+class User extends Model implements Searchable
 {
     use InteractsWithSearchEngine;
 }
@@ -182,19 +182,76 @@ use Support\Search\Scout\Attributes\ScoutConnection;
 use Support\Search\Scout\Attributes\ScoutQueue;
 use Support\Search\Scout\Attributes\UseScoutBuilder;
 
-#[UseScoutBuilder(CompanySearchBuilder::class)]
+#[UseScoutBuilder(UserSearchBuilder::class)]
 #[ScoutQueue('search')]
 #[ScoutConnection('redis')]
-class Company extends Model implements Searchable
+class User extends Model implements Searchable
 {
     use InteractsWithSearchEngine;
 }
 ```
 
-- `#[UseScoutBuilder]` sets the builder `Company::search()` returns. It must extend `Laravel\Scout\Builder`.
+```php
+use Laravel\Scout\Builder;
+
+/** @extends Builder<User> */
+class UserSearchBuilder extends Builder
+{
+    //..
+}
+```
+
+- `#[UseScoutBuilder]` sets the builder `User::search()` returns. It must extend `Laravel\Scout\Builder`.
 - `#[ScoutQueue]` and `#[ScoutConnection]` set where the sync job goes. They only matter when `scout.queue` is on. With it off, Scout syncs right away and there's no job.
 
 Leave an attribute off and you get Scout's default. Attributes don't carry over to subclasses, so a child model that wants them has to declare its own.
+
+#### Reindexing when related models change
+
+Scout only updates a model's search document when that model itself is saved. If the document also uses data from other models, add `#[Reindex]` to `toSearchableArray()` for each event that should update it.
+
+Say each user belongs to a team, and the user's document includes the team's name. When the team changes, every user on it needs updating:
+
+```php
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Support\Search\Scout\Attributes\Reindex;
+
+class User extends Model implements Searchable
+{
+    use InteractsWithSearchEngine;
+
+    #[Reindex(on: 'eloquent.saved: '.Team::class, location: 'users')]
+    #[Reindex(on: TeamRenamed::class, location: 'team.users')]
+    public function toSearchableArray(): array
+    {
+        return [
+            'name' => $this->name,
+            'team' => $this->team->name,
+        ];
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+}
+```
+
+- `on` is the event to listen for. It can be one of Eloquent's own events, like `'eloquent.saved: '.Team::class`, or your own event class, like a `TeamRenamed` event with a public `$team` property.
+- `location` is the path from the event to the model that should update, in the same dot notation you'd pass to `with()`. An Eloquent event's path starts at the model it was fired for, so `users` is `Team`'s `users()` relationship. An event class's path starts at one of its properties, so `team.users` is the event's `$team`, then its `users()`. The path can go through relationships that return many models, and the whole path is eager loaded.
+
+Each model it finds is updated the same way Scout updates a model when it's saved. So `shouldBeSearchable()`, `withoutSyncingToSearch()`, `scout.after_commit` and `scout.soft_delete` all still apply.
+
+Then register each model in your app's service provider. The package doesn't find these on its own, because the listeners have to be set up before the first event fires:
+
+```php
+use Support\Search\Scout\Listeners\UpdateIndex;
+
+public function boot(): void
+{
+    UpdateIndex::for(User::class);
+}
+```
 
 #### Testing
 

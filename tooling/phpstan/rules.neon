@@ -63,3 +63,7 @@ services:
         class: Tooling\Search\PhpStan\Scout\UseScoutBuilderMustReferenceScoutBuilder
         tags:
             - phpstan.rules.rule
+    -
+        class: Tooling\Search\PhpStan\Scout\ReindexMustOnlyBeOnToSearchableArray
+        tags:
+            - phpstan.rules.rule

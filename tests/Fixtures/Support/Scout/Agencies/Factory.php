@@ -11,12 +11,16 @@ use Illuminate\Database\Eloquent\Factories;
  */
 class Factory extends Factories\Factory
 {
-    protected $model = Agency::class;
-
     public function definition(): array
     {
         return [
             'name' => fake()->company(),
+            'active' => true,
         ];
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(['active' => false]);
     }
 }
