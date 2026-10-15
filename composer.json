@@ -17,8 +17,8 @@
     ],
     "require": {
         "php": "^8.4",
-        "aryeo/primitives": "0.0.12",
-        "aryeo/tooling-laravel": "0.0.39",
+        "aryeo/primitives": "0.0.13",
+        "aryeo/tooling-laravel": "0.0.40",
         "directorytree/opensearch-adapter": "^1.2",
         "directorytree/opensearch-client": "^1.0",
         "directorytree/opensearch-migrations": "^1.1",
