@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Support\Search\OpenSearch\Facades;
+namespace Support\Search\OpenSearch\Adapter\Facades;
 
 use DirectoryTree\OpenSearchAdapter\Documents\DocumentManagerInterface;
 use DirectoryTree\OpenSearchAdapter\Testing\Fakes\FakeDocumentManager;

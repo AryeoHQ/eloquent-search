@@ -253,12 +253,46 @@ public function boot(): void
 }
 ```
 
-#### Testing
+#### Index migrations
 
-The `Support\Search\OpenSearch\Facades\DocumentManager` and `IndexManager` facades each have a `fake()` method, so tests don't need a running OpenSearch:
+Every index created through this package is strict. That covers migrations, `scout:index`, and the `IndexManager` facade. A document with a field the mapping doesn't have gets rejected instead of quietly added. A migration can't turn this off, because `dynamic` is set to `strict` after the migration builds its mapping.
+
+For that to hold, `action.auto_create_index` has to be turned off on your OpenSearch cluster. If it's on, saving a model before its index exists makes OpenSearch create the index itself, with a mapping guessed from that one document, and that index isn't strict.
+
+Create a migration with `php artisan opensearch:make:migration create_posts_index`. Like Laravel's database migrations, the file returns an anonymous class:
 
 ```php
-use Support\Search\OpenSearch\Facades\DocumentManager;
+use DirectoryTree\OpenSearchAdapter\Indices\Mapping;
+use DirectoryTree\OpenSearchMigrations\MigrationInterface;
+use Support\Search\OpenSearch\Migrations\Facades\Index;
+
+return new class implements MigrationInterface
+{
+    public function up(): void
+    {
+        Index::create('posts', function (Mapping $mapping) {
+            $mapping->keyword('id');
+            $mapping->text('title');
+        });
+    }
+
+    public function down(): void
+    {
+        Index::dropIfExists('posts');
+    }
+};
+```
+
+Import `Index` from this package, as the example does. `directorytree/opensearch-migrations` has an `Index` facade too, but its `fake()` doesn't make mappings strict, so tests that use it won't match what OpenSearch gets. PHPStan flags it if you import it by mistake.
+
+Don't set `dynamic` on an object or nested field, like `$mapping->object('meta', ['dynamic' => true])`. That setting applies to everything inside the field, so it turns strict off there. Leave it out and the field stays strict like the rest of the index.
+
+#### Testing
+
+The `DocumentManager`, `IndexManager`, and `Index` facades each have a `fake()` method, so tests don't need a running OpenSearch. The first two are in `Support\Search\OpenSearch\Adapter\Facades`, and `Index` is in `Support\Search\OpenSearch\Migrations\Facades`. The index fakes make mappings strict just like the real ones, so your tests see what OpenSearch would get:
+
+```php
+use Support\Search\OpenSearch\Adapter\Facades\DocumentManager;
 
 $documents = DocumentManager::fake();
 ```
