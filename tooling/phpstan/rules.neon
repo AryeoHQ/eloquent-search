@@ -67,3 +67,7 @@ services:
         class: Tooling\Search\PhpStan\Scout\ReindexMustOnlyBeOnToSearchableArray
         tags:
             - phpstan.rules.rule
+    -
+        class: Tooling\Search\PhpStan\OpenSearch\DisallowNonStrictIndexManagers
+        tags:
+            - phpstan.rules.rule

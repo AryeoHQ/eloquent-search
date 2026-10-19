@@ -19,6 +19,8 @@ abstract class TestCase extends Testbench\TestCase
     use WithCachedConfig;
     use WithCachedRoutes;
 
+    protected $enablesPackageDiscoveries = true;
+
     protected function defineDatabaseMigrations(): void
     {
         Schema::create('users', function (Blueprint $table) {
@@ -62,8 +64,6 @@ abstract class TestCase extends Testbench\TestCase
     }
 
     /**
-     * Get package providers.
-     *
      * @param  Application  $app
      * @return array<int, class-string>
      */

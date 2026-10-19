@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Support\Search\OpenSearch\Facades;
+namespace Support\Search\OpenSearch\Adapter\Facades;
 
 use DirectoryTree\OpenSearchAdapter\Indices\IndexManagerInterface;
-use DirectoryTree\OpenSearchAdapter\Testing\Fakes\FakeIndexManager;
 use Illuminate\Support\Facades\Facade;
+use Support\Search\OpenSearch\Adapter\Testing\Fakes\FakeIndexManager;
 
 /**
  * @see \DirectoryTree\OpenSearchAdapter\Indices\IndexManagerInterface
