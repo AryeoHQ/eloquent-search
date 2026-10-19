@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Support\Search\OpenSearch\Migrations\Testing\Fakes;
 
 use DirectoryTree\OpenSearchAdapter\Indices\Mapping;
-use Orchestra\Testbench\Attributes\WithConfig;
+use Orchestra\Testbench\Attributes\WithEnv;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -24,7 +24,7 @@ class FakeIndexManagerTest extends TestCase
     }
 
     #[Test]
-    #[WithConfig('opensearch-migrations.index_name_prefix', 'prefix_')]
+    #[WithEnv('SCOUT_PREFIX', 'prefix_')]
     public function it_does_not_create_an_index_that_already_exists(): void
     {
         $fake = new FakeIndexManager(['posts']);

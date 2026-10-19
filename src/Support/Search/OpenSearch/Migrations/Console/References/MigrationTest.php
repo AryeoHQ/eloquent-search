@@ -27,10 +27,9 @@ class MigrationTest extends TestCase
     public function it_derives_the_file_path(): void
     {
         $this->freezeTime();
-        config(['opensearch-migrations.storage_directory' => '/migrations/']);
 
         $this->assertSame(
-            '/migrations/'.Date::now()->format('Y_m_d_His').'_create_posts_index.php',
+            config('opensearch.migrations.directory').'/'.Date::now()->format('Y_m_d_His').'_create_posts_index.php',
             (new Migration('CreatePostsIndex'))->filePath->toString(),
         );
     }
