@@ -26,6 +26,7 @@
         "laravel/framework": "^12.36 || ^13",
         "laravel/scout": "^10",
         "nikic/php-parser": "^5.7",
+        "opensearch-project/opensearch-php": "^2.6",
         "phpstan/phpstan": "^2.1"
     },
     "require-dev": {

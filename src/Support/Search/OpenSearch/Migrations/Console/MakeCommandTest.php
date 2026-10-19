@@ -19,7 +19,7 @@ class MakeCommandTest extends TestCase
     public function it_generates_a_migration_that_uses_our_index_facade(): void
     {
         $this->freezeTime();
-        File::fake(config('opensearch-migrations.storage_directory').'*');
+        File::fake(config('opensearch.migrations.directory').'*');
 
         $this->artisan(MakeCommand::class, ['name' => 'create_posts_index'])->assertSuccessful();
 

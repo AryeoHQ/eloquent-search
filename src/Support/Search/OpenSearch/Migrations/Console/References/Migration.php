@@ -34,7 +34,7 @@ final class Migration implements Reference
     }
 
     public Stringable $directory {
-        get => str(config('opensearch-migrations.storage_directory'))->rtrim('/');
+        get => str(config('opensearch.migrations.directory'))->rtrim('/');
     }
 
     public Stringable $filePath {

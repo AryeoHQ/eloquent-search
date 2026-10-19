@@ -158,6 +158,28 @@ User::sort(null)->get() // no sorting applied
 
 Search is built on [Laravel Scout](https://laravel.com/docs/scout) with an OpenSearch driver. The package registers Scout and the OpenSearch driver for you, so set `scout.driver` to `opensearch` and you're ready.
 
+#### Configuration
+
+Everything is set with env vars, and each one has a default that works for local development. There's no config file to publish.
+
+| Variable | Default | What it does |
+| --- | --- | --- |
+| `OPENSEARCH_HOST` | `http://localhost:9200` | Where OpenSearch is. Scout and migrations both use it. |
+| `OPENSEARCH_USERNAME` | none | The username to log in with. Leave it out if OpenSearch doesn't need a login. |
+| `OPENSEARCH_PASSWORD` | none | The password to log in with. |
+| `OPENSEARCH_CONNECT_TIMEOUT` | `10` | How many seconds to wait to connect. |
+| `OPENSEARCH_TIMEOUT` | `30` | How many seconds to wait for a response. |
+| `OPENSEARCH_SSL_VERIFY` | `true` | Whether to check OpenSearch's TLS certificate. It can also be a path to a custom certificate. |
+| `OPENSEARCH_RETRIES` | `0` | How many times to retry a failed request. |
+| `OPENSEARCH_AWS_REGION` | none | Signs requests for Amazon's hosted OpenSearch. See below. |
+| `OPENSEARCH_AWS_SERVICE` | `es` | Use `aoss` for OpenSearch Serverless. |
+| `OPENSEARCH_MIGRATIONS_DIRECTORY` | `opensearch/migrations` | Where your index migrations live, as a path from your app's root. |
+| `OPENSEARCH_MIGRATIONS_TABLE` | `opensearch_migrations` | The database table that tracks which migrations have run. It's on your default database. |
+| `OPENSEARCH_SCOUT_REFRESH_DOCUMENTS` | `false` | Makes indexed and deleted documents show up in searches right away. Handy in tests, but leave it off in production. |
+| `SCOUT_PREFIX` | none | Scout's own prefix. It goes in front of every index and alias name, for Scout and migrations alike. Give each environment its own. |
+
+If you use Amazon's hosted OpenSearch, set `OPENSEARCH_AWS_REGION` and install the AWS SDK with `composer require aws/aws-sdk-php`. It finds your AWS credentials the usual way, from `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` or the server's IAM role.
+
 #### Setting up your model
 
 Implement the `Support\Search\Scout\Contracts\Searchable` contract and use the `Support\Search\Scout\Provides\InteractsWithSearchEngine` trait. Use this trait instead of Scout's own `Searchable` trait. It wraps Scout's trait and also reads the attributes below.
