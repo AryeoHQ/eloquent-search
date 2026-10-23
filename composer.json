@@ -37,13 +37,10 @@
         "rector/rector": "^2.1"
     },
     "repositories": {
-        "primitives": {
-            "type": "vcs",
-            "url": "https://github.com/AryeoHQ/primitives"
-        },
-        "tooling-laravel": {
-            "type": "vcs",
-            "url": "https://github.com/AryeoHQ/tooling-laravel"
+        "artifactory": {
+            "type": "composer",
+            "url": "https://artifactory.zgtools.net/artifactory/api/composer/listing-and-vendor-management-composer/",
+            "only": ["aryeo/*", "zillow/*"]
         }
     },
     "autoload": {
