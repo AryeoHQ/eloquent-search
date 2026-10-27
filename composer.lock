@@ -4,25 +4,25 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3eff73be12e0574d9d2b8b34d3b120b0",
+    "content-hash": "759fb8bedf920b7f12f93a5a6713c2d2",
     "packages": [
         {
             "name": "aryeo/primitives",
-            "version": "0.0.13",
+            "version": "0.0.15",
             "dist": {
                 "type": "zip",
-                "url": "https://artifactory.zgtools.net/artifactory/api/composer/listing-and-vendor-management-composer/direct-dists/aryeo/primitives/primitives-0.0.13.zip",
-                "reference": "0fe13e553e84cfa6a7f0fefef7c861b3e2dec496"
+                "url": "https://artifactory.zgtools.net/artifactory/api/composer/listing-and-vendor-management-composer/direct-dists/aryeo/primitives/primitives-0.0.15.zip",
+                "reference": "8d128d9623e5697abd6e56a0cc886cc0ac4240b3"
             },
             "require": {
                 "ext-bcmath": "*",
                 "ext-filter": "*",
                 "laravel/framework": "^12.36 || ^13",
                 "nesbot/carbon": "^3.10",
-                "php": "^8.4"
+                "php": "^8.5"
             },
             "require-dev": {
-                "aryeo/tooling-laravel": "0.0.40",
+                "aryeo/tooling-laravel": "0.0.43",
                 "brianium/paratest": "^7.14",
                 "orchestra/testbench": "^10.6 || ^11",
                 "orchestra/testbench-core": "^10.7 || ^11",
