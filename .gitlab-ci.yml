@@ -1,8 +1,10 @@
 # Tests aryeo/eloquent-search and publishes it to the Artifactory Composer repository.
 #
-# Branches run the tests and the code style, static analysis and dependency checks. A
-# semver tag push (e.g. 0.0.21) runs the same checks, then packages the tagged source and
-# publishes it.
+# Branches run the tests and the code style, static analysis and dependency checks.
+# Releases come from main: after the checks pass, the release job reads the merge request
+# titles since the last tag and pushes the next tag (fix: patch, feat: minor, feat!: or fix!:
+# major, chore: none). The tag pipeline then runs the same checks, packages the tagged source
+# and publishes it. To republish a tag whose pipeline failed, run a new pipeline on that tag.
 #
 # The job scripts come from the shared template.
 include:
@@ -12,6 +14,7 @@ include:
 
 stages:
   - test
+  - release
   - package
   - publish
 
@@ -20,12 +23,12 @@ default:
     - build
   interruptible: true
 
+# Merge requests run as merge request pipelines; the only branch pipelines are on the default
+# branch, where the release job runs. Tags run the publish jobs.
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
-      when: never
-    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_TAG
 
 tests:
@@ -50,6 +53,15 @@ dependency-analysis:
   stage: test
   extends: .php-dependency-analysis
 
+# Runs only on main, so merge requests and other branches never tag. RELEASE_TOKEN comes from
+# the vendor-platform group and is protected, which is why only main gets it.
+release:
+  stage: release
+  extends: .release
+  needs: [tests, code-style, static-analysis, dependency-analysis]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
 package:
   stage: package
   extends: .package
@@ -63,19 +75,3 @@ publish:
   needs: [package]
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+$/
-
-# Publishes existing tags that predate the GitLab pipeline. Run a pipeline on main with
-# BACKFILL_TAGS set, e.g. "0.0.17 0.0.18 0.0.19 0.0.20". Versions already in Artifactory are skipped.
-backfill:package:
-  stage: package
-  extends: .backfill-package
-  needs: []
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $BACKFILL_TAGS
-
-backfill:publish:
-  stage: publish
-  extends: .backfill-publish
-  needs: ["backfill:package"]
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $BACKFILL_TAGS
